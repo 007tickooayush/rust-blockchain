@@ -24,6 +24,14 @@ pub struct Blockchain {
 }
 
 impl Block {
+
+    pub fn new_genesis_block() -> Block {
+        Block::new(String::from("Genesis Block"),String::new(),0).unwrap()
+    }
+
+    pub fn get_hash(&self) -> String {
+        self.hash.clone()
+    }
     ///
     ///
     /// # Arguments
@@ -98,5 +106,37 @@ impl Block {
         );
         let bytes = bincode::serialize(&block)?;
         Ok(bytes)
+    }
+}
+
+impl Blockchain {
+    pub fn new() -> Blockchain {
+        Blockchain {
+            chain: vec![Block::new_genesis_block()]
+        }
+    }
+
+    pub fn add_block(&mut self, data: String) -> Result<()> {
+        let prev = self.chain.last().unwrap();
+        let next_block = Block::new(data,prev.get_hash(),TARGET_HEX)?;
+
+        self.chain.push(next_block);
+
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test_blockchain {
+    use super::*;
+
+    #[test]
+    fn test_blockchain() {
+        let mut b = Blockchain::new();
+
+        b.add_block(String::from("Block 1 data")).unwrap();
+        b.add_block("Block 2 data".to_string()).unwrap();
+
+        dbg!(b);
     }
 }
